@@ -927,6 +927,9 @@ function selectRole(r) {
   document.getElementById('login-chauffeur-fields').style.display = r==='chauffeur' ? 'block' : 'none';
   document.getElementById('login-gestionnaire-fields').style.display = r==='gestionnaire' ? 'block' : 'none';
 }
+window.GLOBAL_PINS = {"Cailliau Christophe":"2824","Platevoet Demitry":"1409","Fiolet Frédéric":"5506","Mahieux Robin":"5012","Thomas Florian":"4657","Millot Clément":"3286","Thomas Dimitri":"2679","Gardin Brandon":"9935","Wadoux Orient":"2424","Decroix Alexis":"7912","Demarthe Logan":"1520","Roy Guillaume":"1488","Bouchez Dylan":"2535","Davre Mickaël":"4582","Davre Michel":"4811","Souvignon Alexis":"9279","Grisel Nicolas":"1434","Vichery Vincent":"5734","Santune Matteo":"2613","Desmet Alain":"6673","Verheecke Anthony":"7708"};
+window.PANIER_DEP_EMPLOYEES = ['Demarthe Logan'];
+
 function doLogin() {
   document.getElementById('login-error').style.display = 'none';
   if (loginRole === 'gestionnaire') {
