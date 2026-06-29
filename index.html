@@ -770,6 +770,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'SF Pro
       <div style="display:flex; gap:4px; margin-bottom:8px;">
         <button id="sal-tab-t" onclick="salTab('transport',this)" style="flex:1;padding:8px;border:1.5px solid #064e3b;border-radius:8px;background:#064e3b;color:white;font-size:13px;font-weight:600;cursor:pointer;">🚚 Transport (<span id="sal-count-t">0</span>)</button>
         <button id="sal-tab-d" onclick="salTab('depannage',this)" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">🔧 Dépannage (<span id="sal-count-d">0</span>)</button>
+        <button id="sal-tab-a" onclick="salTab('atelier',this)" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">🔨 Atelier (<span id="sal-count-a">0</span>)</button>
       </div>
       <div class="card" id="sal-list-container">
         <div id="sal-list"></div>
@@ -1348,13 +1349,19 @@ function salTab(cat, btn){
   document.getElementById('sal-tab-d').style.background=cat==='depannage'?'#064e3b':'var(--bg)';
   document.getElementById('sal-tab-d').style.color=cat==='depannage'?'white':'var(--text)';
   document.getElementById('sal-tab-d').style.borderColor=cat==='depannage'?'#064e3b':'var(--border)';
+  if(document.getElementById('sal-tab-a')){
+    document.getElementById('sal-tab-a').style.background=cat==='atelier'?'#8b5cf6':'var(--bg)';
+    document.getElementById('sal-tab-a').style.color=cat==='atelier'?'white':'var(--text)';
+    document.getElementById('sal-tab-a').style.borderColor=cat==='atelier'?'#8b5cf6':'var(--border)';
+  }
   renderSalList();
 }
 
 function renderSalList(){
-  const names=salListCat==='transport'?TRANSPORT_NAMES:DEPANNAGE_NAMES;
+  const names=salListCat==='transport'?TRANSPORT_NAMES:salListCat==='depannage'?DEPANNAGE_NAMES:ATELIER_NAMES;
   document.getElementById('sal-count-t').textContent=TRANSPORT_NAMES.length;
   document.getElementById('sal-count-d').textContent=DEPANNAGE_NAMES.length;
+  if(document.getElementById('sal-count-a')) document.getElementById('sal-count-a').textContent=ATELIER_NAMES.length;
   const el=document.getElementById('sal-list');
   if(!names.length){
     el.innerHTML='<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:14px;">Aucun salarié</div>';
@@ -2309,17 +2316,6 @@ document.getElementById('d-date').value = new Date().toISOString().split('T')[0]
 // ═════════════════════════════════════════════════════════════════
 // ATELIER
 // ═════════════════════════════════════════════════════════════════
-function enterAtelier(nom) {
-  const today = new Date();
-  document.getElementById('a-topbar-name').textContent = nom;
-  document.getElementById('a-date').value = today.toISOString().split('T')[0];
-  document.getElementById('a-topbar-date').textContent = today.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
-  document.getElementById('a-conge').checked = false;
-  document.getElementById('a-conge-alert').style.display = 'none';
-  document.getElementById('a-work-section').style.display = 'block';
-  showScreen('screen-atelier');
-}
-
 function toggleCongeA() {
   const checked = document.getElementById('a-conge').checked;
   document.getElementById('a-conge-alert').style.display = checked ? 'block' : 'none';
