@@ -2075,81 +2075,7 @@ function imprimerFiche() {
   </div>
 </div>
 
-<!-- ATELIER SCREEN -->
-<div class="screen" id="screen-atelier">
-  <div class="topbar" style="background:linear-gradient(135deg,#8b5cf6,#a855f7);">
-    <div>
-      <div class="topbar-title" id="a-topbar-name">Employé Atelier</div>
-      <div class="topbar-sub" id="a-topbar-date">—</div>
-    </div>
-    <button class="topbar-btn" onclick="logout()">Déco.</button>
-  </div>
-  <div class="scroll-area" id="a-scroll">
-    <div id="a-page-pointage">
-    <div class="section-title">Mon pointage Atelier</div>
-    <div class="section-sub">Lun–Ven 8h–12h / 14h–17h30</div>
-    <div class="card">
-      <div class="card-header">📅 Date de travail</div>
-      <div class="field"><input type="date" id="a-date"></div>
-    </div>
-    <div class="card" style="background:#fef3c7;border-left:4px solid #f59e0b;">
-      <div class="toggle-row">
-        <label for="a-conge" style="font-size:15px;font-weight:600;">🏖️ En congé ce jour</label>
-        <label class="toggle"><input type="checkbox" id="a-conge" onchange="toggleCongeA()"><span class="toggle-slider"></span></label>
-      </div>
-      <div id="a-conge-alert" class="alert alert-warning" style="display:none;margin-top:10px;">🏖️ Journée en congé enregistrée</div>
-    </div>
-    <div id="a-work-section">
-    <div class="card">
-      <div class="card-header">⏱️ Mes horaires</div>
-      <div class="time-grid">
-        <div class="time-cell"><div class="time-cell-label">🟢 Départ</div><input type="time" id="a-dep" value="08:00"></div>
-        <div class="time-cell"><div class="time-cell-label">☕ Début pause</div><input type="time" id="a-pd" value="12:00"></div>
-        <div class="time-cell"><div class="time-cell-label">▶️ Fin pause</div><input type="time" id="a-pf" value="14:00"></div>
-        <div class="time-cell"><div class="time-cell-label">🔴 Fin journée</div><input type="time" id="a-fin" value="17:30"></div>
-      </div>
-    </div>
-    </div>
-    <button class="btn-primary" onclick="saveA()" style="margin:20px 0;background:linear-gradient(135deg,#8b5cf6,#a855f7);">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      Enregistrer ma journée
-    </button>
-    <div class="alert alert-success" id="a-saved" style="display:none;">✅ Journée enregistrée !</div>
-    </div>
 
-    <div id="a-page-historique" style="display:none;">
-      <div class="section-title">Mon historique</div>
-      <div class="section-sub">Récapitulatif de mes temps de travail</div>
-      <div class="month-nav" style="margin-bottom:12px;">
-        <button class="month-nav-btn" onclick="changeHistoMois('a',-1)">‹</button>
-        <span id="a-histo-month-label" style="font-weight:600;font-size:15px;"></span>
-        <button class="month-nav-btn" onclick="changeHistoMois('a',1)">›</button>
-      </div>
-      <div class="stat-grid">
-        <div class="stat-card" style="background:#8b5cf6;"><div class="stat-val" id="a-histo-jours">—</div><div class="stat-lbl">Jours travaillés</div></div>
-        <div class="stat-card accent"><div class="stat-val" id="a-histo-heures">—</div><div class="stat-lbl">Heures totales</div></div>
-        <div class="stat-card" style="background:#d97706;"><div class="stat-val" id="a-histo-conges">—</div><div class="stat-lbl">Jours congés</div></div>
-        <div class="stat-card"><div class="stat-val" id="a-histo-supp">—</div><div class="stat-lbl">Heures supp.</div></div>
-      </div>
-      <div class="card"><div class="card-header">📋 Détail jour par jour</div><div id="a-histo-list"></div></div>
-    </div>
-  </div>
-  <div class="bottom-nav" style="border-top-color:#c4b5fd;">
-    <button class="nav-item active" style="color:#8b5cf6;" onclick="aNav('pointage',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span>Pointage</span>
-    </button>
-    <button class="nav-item" onclick="aNav('historique',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-      <span>Historique</span>
-    </button>
-    <button class="nav-item" onclick="enterConge(currentUser)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Congés</span>
-    </button>
-  </div>
-</div>
-<!-- FIN ATELIER SCREEN -->
 
 </body></html>`);
   win.document.close();
@@ -2223,81 +2149,7 @@ function imprimerToutesFiches() {
   </div>
 </div>
 
-<!-- ATELIER SCREEN -->
-<div class="screen" id="screen-atelier">
-  <div class="topbar" style="background:linear-gradient(135deg,#8b5cf6,#a855f7);">
-    <div>
-      <div class="topbar-title" id="a-topbar-name">Employé Atelier</div>
-      <div class="topbar-sub" id="a-topbar-date">—</div>
-    </div>
-    <button class="topbar-btn" onclick="logout()">Déco.</button>
-  </div>
-  <div class="scroll-area" id="a-scroll">
-    <div id="a-page-pointage">
-    <div class="section-title">Mon pointage Atelier</div>
-    <div class="section-sub">Lun–Ven 8h–12h / 14h–17h30</div>
-    <div class="card">
-      <div class="card-header">📅 Date de travail</div>
-      <div class="field"><input type="date" id="a-date"></div>
-    </div>
-    <div class="card" style="background:#fef3c7;border-left:4px solid #f59e0b;">
-      <div class="toggle-row">
-        <label for="a-conge" style="font-size:15px;font-weight:600;">🏖️ En congé ce jour</label>
-        <label class="toggle"><input type="checkbox" id="a-conge" onchange="toggleCongeA()"><span class="toggle-slider"></span></label>
-      </div>
-      <div id="a-conge-alert" class="alert alert-warning" style="display:none;margin-top:10px;">🏖️ Journée en congé enregistrée</div>
-    </div>
-    <div id="a-work-section">
-    <div class="card">
-      <div class="card-header">⏱️ Mes horaires</div>
-      <div class="time-grid">
-        <div class="time-cell"><div class="time-cell-label">🟢 Départ</div><input type="time" id="a-dep" value="08:00"></div>
-        <div class="time-cell"><div class="time-cell-label">☕ Début pause</div><input type="time" id="a-pd" value="12:00"></div>
-        <div class="time-cell"><div class="time-cell-label">▶️ Fin pause</div><input type="time" id="a-pf" value="14:00"></div>
-        <div class="time-cell"><div class="time-cell-label">🔴 Fin journée</div><input type="time" id="a-fin" value="17:30"></div>
-      </div>
-    </div>
-    </div>
-    <button class="btn-primary" onclick="saveA()" style="margin:20px 0;background:linear-gradient(135deg,#8b5cf6,#a855f7);">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      Enregistrer ma journée
-    </button>
-    <div class="alert alert-success" id="a-saved" style="display:none;">✅ Journée enregistrée !</div>
-    </div>
 
-    <div id="a-page-historique" style="display:none;">
-      <div class="section-title">Mon historique</div>
-      <div class="section-sub">Récapitulatif de mes temps de travail</div>
-      <div class="month-nav" style="margin-bottom:12px;">
-        <button class="month-nav-btn" onclick="changeHistoMois('a',-1)">‹</button>
-        <span id="a-histo-month-label" style="font-weight:600;font-size:15px;"></span>
-        <button class="month-nav-btn" onclick="changeHistoMois('a',1)">›</button>
-      </div>
-      <div class="stat-grid">
-        <div class="stat-card" style="background:#8b5cf6;"><div class="stat-val" id="a-histo-jours">—</div><div class="stat-lbl">Jours travaillés</div></div>
-        <div class="stat-card accent"><div class="stat-val" id="a-histo-heures">—</div><div class="stat-lbl">Heures totales</div></div>
-        <div class="stat-card" style="background:#d97706;"><div class="stat-val" id="a-histo-conges">—</div><div class="stat-lbl">Jours congés</div></div>
-        <div class="stat-card"><div class="stat-val" id="a-histo-supp">—</div><div class="stat-lbl">Heures supp.</div></div>
-      </div>
-      <div class="card"><div class="card-header">📋 Détail jour par jour</div><div id="a-histo-list"></div></div>
-    </div>
-  </div>
-  <div class="bottom-nav" style="border-top-color:#c4b5fd;">
-    <button class="nav-item active" style="color:#8b5cf6;" onclick="aNav('pointage',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span>Pointage</span>
-    </button>
-    <button class="nav-item" onclick="aNav('historique',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-      <span>Historique</span>
-    </button>
-    <button class="nav-item" onclick="enterConge(currentUser)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Congés</span>
-    </button>
-  </div>
-</div>
-<!-- FIN ATELIER SCREEN -->
 
 </body></html>`);
   win.document.close();
@@ -2327,35 +2179,6 @@ function toggleCongeA() {
   document.getElementById('a-conge-alert').style.display = checked ? 'block' : 'none';
   document.getElementById('a-work-section').style.display = checked ? 'none' : 'block';
 }
-
-function saveA() {
-  const nom = document.getElementById('a-topbar-name').textContent;
-  const date = document.getElementById('a-date').value;
-  const conge = document.getElementById('a-conge').checked;
-  const dep = document.getElementById('a-dep').value;
-  const pd = document.getElementById('a-pd').value;
-  const pf = document.getElementById('a-pf').value;
-  const fin = document.getElementById('a-fin').value;
-  
-  const data = {
-    nom: nom,
-    type: 'atelier',
-    date: date,
-    conge: conge,
-    dep: dep,
-    pd: pd,
-    pf: pf,
-    fin: fin,
-    timestamp: new Date().toISOString()
-  };
-  
-  const savedEl = document.getElementById('a-saved');
-  if (savedEl) {
-    savedEl.style.display = 'flex';
-    setTimeout(() => { savedEl.style.display = 'none'; }, 3000);
-  }
-}
-
 
 // ════ HISTORIQUE & CONGÉS ════
 if (!window.histoMois) window.histoMois = { t: new Date(), d: new Date(), a: new Date() };
@@ -2619,7 +2442,14 @@ function aNav(page, btn) {
   btn.classList.add('active');
   document.getElementById('a-page-pointage').style.display=page==='pointage'?'block':'none';
   document.getElementById('a-page-historique').style.display=page==='historique'?'block':'none';
+  document.getElementById('a-page-profil').style.display=page==='profil'?'block':'none';
   if(page==='historique') renderHistoAtelier();
+  if(page==='profil') renderProfilAtelier();
+}
+function renderProfilAtelier() {
+  const nom = currentUser;
+  document.getElementById('a-profil-nom').textContent = nom;
+  document.getElementById('a-profil-avatar').textContent = nom.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
 }
 function renderHistoAtelier() {
   const nom=currentUser;
@@ -2760,68 +2590,7 @@ function renderHistoAtelier() {
     .catch(e=>console.warn('Config salaries:', e.message));
 </script>
 
-<!-- ATELIER SCREEN -->
-<div class="screen" id="screen-atelier">
-  <div class="topbar" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
-    <div>
-      <div class="topbar-title" id="a-topbar-name">Employé Atelier</div>
-      <div class="topbar-sub" id="a-topbar-date">—</div>
-    </div>
-    <button class="topbar-btn" onclick="logout()">Déco.</button>
-  </div>
-  <div class="scroll-area" id="a-scroll">
 
-    <div class="section-title">Mon pointage Atelier</div>
-    <div class="section-sub" id="a-ref-horaire">Lun–Ven 8h–12h / 14h–17h30</div>
-
-    <div class="card">
-      <div class="card-header">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
-        Date de travail
-      </div>
-      <div class="field">
-        <input type="date" id="a-date">
-      </div>
-    </div>
-
-    <div class="card" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
-      <div class="toggle-row">
-        <label for="a-conge" style="font-size:15px; font-weight:600;">🏖️ En congé ce jour</label>
-        <label class="toggle">
-          <input type="checkbox" id="a-conge" onchange="toggleCongeA()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div id="a-conge-alert" class="alert alert-warning" style="display:none; margin-top:10px;">
-        🏖️ Journée en congé enregistrée
-      </div>
-    </div>
-
-    <div id="a-work-section">
-    <div class="card">
-      <div class="card-header">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8l5 3-5 3V8z"/></svg>
-        Horaires
-      </div>
-      <div class="time-grid">
-        <div class="time-cell"><div class="time-cell-label">🟢 Départ</div><input type="time" id="a-dep" value="08:00"></div>
-        <div class="time-cell"><div class="time-cell-label">☕ Début pause</div><input type="time" id="a-pd" value="12:00"></div>
-        <div class="time-cell"><div class="time-cell-label">▶️ Fin pause</div><input type="time" id="a-pf" value="14:00"></div>
-        <div class="time-cell"><div class="time-cell-label">🔴 Fin journée</div><input type="time" id="a-fin" value="17:30"></div>
-      </div>
-    </div>
-    </div>
-
-    <button class="btn-primary" onclick="saveA()" style="margin:20px 0; background: linear-gradient(135deg, #8b5cf6, #a855f7);">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      Enregistrer ma journée
-    </button>
-
-    <div class="alert alert-success" id="a-saved" style="display:none;">✅ Journée enregistrée !</div>
-
-  </div>
-</div>
-<!-- FIN ATELIER SCREEN -->
 
 
 
@@ -2920,6 +2689,26 @@ function renderHistoAtelier() {
       </div>
       <div class="card"><div class="card-header">📋 Détail jour par jour</div><div id="a-histo-list"></div></div>
     </div>
+
+    <div id="a-page-profil" style="display:none;">
+      <div class="section-title">Mon profil</div>
+      <div class="section-sub">Informations sur votre poste</div>
+      <div class="card">
+        <div class="card-header">👤 Identité</div>
+        <div style="display:flex;align-items:center;gap:14px;padding:8px 0;">
+          <div class="avatar" style="background:#ede9fe;color:#8b5cf6;width:52px;height:52px;font-size:18px;" id="a-profil-avatar"></div>
+          <div>
+            <div style="font-size:16px;font-weight:700;" id="a-profil-nom">—</div>
+            <div style="font-size:13px;color:var(--text-muted);">🔨 Atelier</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">⏱️ Horaires habituels</div>
+        <div style="font-size:14px;color:var(--text);">Lundi – Vendredi</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">8h00 – 12h00 / 14h00 – 17h30</div>
+      </div>
+    </div>
   </div>
   <div class="bottom-nav" style="border-top-color:#c4b5fd;">
     <button class="nav-item active" style="color:#8b5cf6;" onclick="aNav('pointage',this)">
@@ -2933,6 +2722,10 @@ function renderHistoAtelier() {
     <button class="nav-item" onclick="enterConge(currentUser)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span>Congés</span>
+    </button>
+    <button class="nav-item" onclick="aNav('profil',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profil</span>
     </button>
   </div>
 </div>
