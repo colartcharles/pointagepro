@@ -643,6 +643,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'SF Pro
         <select id="fiche-categorie" onchange="renderFicheList()" style="width:100%; padding:10px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:white; font-size:14px;">
           <option value="transport">🚚 Transport</option>
           <option value="depannage">🔧 Dépannage</option>
+          <option value="atelier">🔨 Atelier</option>
         </select>
       </div>
       <div>
@@ -1860,10 +1861,12 @@ function openFiches() {
   if(window.__db){
     Promise.all([
       window.__db.collection('pointages_transport').get(),
-      window.__db.collection('pointages_depannage').get()
-    ]).then(([tS,dS])=>{
+      window.__db.collection('pointages_depannage').get(),
+      window.__db.collection('pointages_atelier').get()
+    ]).then(([tS,dS,aS])=>{
       dbCache.transport=tS.docs.map(d=>d.data());
       dbCache.depannage=dS.docs.map(d=>d.data());
+      dbCache.atelier=aS.docs.map(d=>d.data());
       renderFicheList();
     }).catch(()=>renderFicheList());
   } else { renderFicheList(); }
@@ -1872,7 +1875,7 @@ function closeFiches() { document.getElementById('overlay-fiches').style.display
 
 function renderFicheList() {
   const cat = document.getElementById('fiche-categorie').value;
-  const names = cat === 'transport' ? TRANSPORT_NAMES : DEPANNAGE_NAMES;
+  const names = cat === 'transport' ? TRANSPORT_NAMES : cat === 'depannage' ? DEPANNAGE_NAMES : ATELIER_NAMES;
   const sel = document.getElementById('fiche-employe');
   sel.innerHTML = names.map(n => `<option value="${n}">${n}</option>`).join('');
   renderFichePreview();
@@ -1908,6 +1911,7 @@ function buildFicheHTML(cat, nom, month) {
     const isOff = isSun || isSat || isFerie;
 
     const e = entryMap[dateStr];
+    const dayLabel = DAYS_FR[dow];
     let hNorm='', hFerie='', hDim='', hInter='', hSupp='', hTotal='', decStr='', panStr='';
     let rowClass = '';
 
@@ -1915,12 +1919,15 @@ function buildFicheHTML(cat, nom, month) {
     else if (isSun) rowClass = 'dimanche';
     else if (isSat) rowClass = 'weekend';
 
+    if (e && (e.isRepos || e.conge)) {
+      const label = e.conge ? '🏖️ Congé' : '🛌 Repos';
+      const color = e.conge ? '#d97706' : 'var(--accent)';
+      rows += `<tr class="${rowClass}"><td style="text-align:left">${dayLabel}</td><td style="font-weight:600">${d}</td>
+        <td colspan="7" style="color:${color};font-style:italic;text-align:center;">${label}</td></tr>`;
+      continue;
+    }
+
     if (e) {
-      if (e.isRepos) {
-        rows += `<tr class="${rowClass}"><td style="text-align:left">${dayLabel}</td><td style="font-weight:600">${d}</td>
-          <td colspan="7" style="color:var(--accent);font-style:italic;text-align:center;">🛌 Repos</td></tr>`;
-        continue;
-      }
       if (cat === 'transport') {
         const mins = e.minutes || 0;
         const supp = e.minutesSupp || 0;
@@ -1931,6 +1938,10 @@ function buildFicheHTML(cat, nom, month) {
         hTotal = fmtH(mins);
         if (e.decouche) { decStr = '🌙'; totDecouche++; }
         if (e.panier) { panStr = '🍽️'; totPanier++; }
+      } else if (cat === 'atelier') {
+        const mins = e.minutes || 0;
+        hNorm = fmtH(mins); totNormal += mins;
+        hTotal = fmtH(mins);
       } else {
         const mins = e.minutes || 0;
         const inter = (e.horsHorairesTotal || 0) * 60;
@@ -1949,13 +1960,6 @@ function buildFicheHTML(cat, nom, month) {
       }
     }
 
-    const dayLabel = DAYS_FR[dow];
-    // Jour de repos
-    if (e && e.isRepos) {
-      rows += `<tr class="${rowClass}"><td style="text-align:left">${dayLabel}</td><td style="font-weight:600">${d}</td>
-        <td colspan="7" style="color:#f97316;font-style:italic;text-align:center;">🛌 Repos</td></tr>`;
-      continue;
-    }
     rows += `<tr class="${rowClass}">
       <td style="text-align:left; font-weight:${isOff?'600':'400'}; color:${isOff?'#64748b':'inherit'}">${dayLabel}</td>
       <td style="font-weight:600">${d}</td>
