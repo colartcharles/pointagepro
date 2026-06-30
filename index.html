@@ -796,7 +796,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'SF Pro
 
 <script>
 /* ── DATA ── */
-const VEHICLES = ['BZ-561-FH','DR-433-ZQ','EZ-202-ND','HL-434-EE','HK-772-SF','GL-608-JS','FP-770-PY','FS-666-TT','GB-091-VN','GC-274-BD','GL-662-ZR','GM-869-ER','GV-868-FZ','HC-368-NB','HE-074-XK','HF-291-HL','HH-125-NW','HH-430-FT','GE-961-PR','FK-722-DS','FB-114-JL','FR-899-CC'];
+const VEHICLES = ['BZ-561-FH','DR-433-ZQ','EZ-202-ND','FP-770-PY','HL-434-EE','HK-772-SF','GL-608-JS','FS-666-TT','GB-091-VN','GC-274-BD','GL-662-ZR','GM-869-ER','GV-868-FZ','HC-368-NB','HE-074-XK','HF-291-HL','HH-125-NW','HH-430-FT','GE-961-PR','FK-722-DS','FB-114-JL','FR-899-CC'];
 
 // PINs globaux (mis à jour depuis Firestore config/salaries)
 window.PANIER_DEP_EMPLOYEES = ['Demarthe Logan'];
@@ -2352,7 +2352,8 @@ function saveA() {
 
 
 // ════ HISTORIQUE & CONGÉS ════
-const histoMois = { t: new Date(), d: new Date(), a: new Date() };
+window.histoMois = window.histoMois || { t: new Date(), d: new Date(), a: new Date() };
+var histoMois = window.histoMois;
 const MONTHS_FR_FULL = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const DAYS_FR_SHORT = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
 const dbCacheConges = [];
