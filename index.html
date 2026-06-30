@@ -796,7 +796,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'SF Pro
 
 <script>
 /* ── DATA ── */
-const VEHICLES = ['BZ-561-FH','DR-433-ZQ','EZ-202-ND','FP-770-PY','HL-434-EE','HK-772-SF','GL-608-JS','FS-666-TT','GB-091-VN','GC-274-BD','GL-662-ZR','GM-869-ER','GV-868-FZ','HC-368-NB','HE-074-XK','HF-291-HL','HH-125-NW','HH-430-FT','GE-961-PR','FK-722-DS','FB-114-JL','FR-899-CC'];
+const VEHICLES = ['BZ-561-FH','DR-433-ZQ','EZ-202-ND','FP-770-PY','FS-666-TT','GB-091-VN','GC-274-BD','GL-662-ZR','GM-869-ER','GV-868-FZ','HC-368-NB','HE-074-XK','HF-291-HL','HH-125-NW','HH-430-FT','GE-961-PR','FK-722-DS','FB-114-JL','FR-899-CC'];
 
 // PINs globaux (mis à jour depuis Firestore config/salaries)
 window.PANIER_DEP_EMPLOYEES = ['Demarthe Logan'];
@@ -1072,17 +1072,19 @@ function updateDateLabel() {
 function initVehs() {
   ['t-veh-select','d-veh-select'].forEach(id => {
     const s = document.getElementById(id);
+    if(!s) return;
     VEHICLES.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; s.appendChild(o); });
   });
 }
 function addVeh(p) {
   const s = document.getElementById(p+'-veh-select');
+  if(!s) return;
   const v = s.value; if (!v || selectedVehs[p].includes(v)) { s.value=''; return; }
   selectedVehs[p].push(v); renderChips(p); s.value='';
 }
 function removeVeh(p, v) { selectedVehs[p] = selectedVehs[p].filter(x=>x!==v); renderChips(p); }
 function renderChips(p) {
-  const c = document.getElementById(p+'-veh-chips'); c.innerHTML='';
+  const c = document.getElementById(p+'-veh-chips'); if(!c) return; c.innerHTML='';
   selectedVehs[p].forEach(v => {
     const chip = document.createElement('div'); chip.className='chip';
     chip.innerHTML = '🚐 '+v+' <button class="chip-remove" onclick="removeVeh(\''+p+'\',\''+v+'\')">×</button>';
@@ -2352,8 +2354,7 @@ function saveA() {
 
 
 // ════ HISTORIQUE & CONGÉS ════
-window.histoMois = window.histoMois || { t: new Date(), d: new Date(), a: new Date() };
-var histoMois = window.histoMois;
+if (!window.histoMois) window.histoMois = { t: new Date(), d: new Date(), a: new Date() };
 const MONTHS_FR_FULL = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const DAYS_FR_SHORT = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
 const dbCacheConges = [];
@@ -2373,12 +2374,12 @@ function dNav(page, btn) {
   if (page==='historique') renderHisto('d');
 }
 function changeHistoMois(prefix, delta) {
-  histoMois[prefix].setMonth(histoMois[prefix].getMonth() + delta);
+  window.histoMois[prefix].setMonth(window.histoMois[prefix].getMonth() + delta);
   renderHisto(prefix);
 }
 function renderHisto(prefix) {
   const nom = currentUser;
-  const mois = histoMois[prefix];
+  const mois = window.histoMois[prefix];
   const y = mois.getFullYear(), m = mois.getMonth();
   const cat = prefix==='t' ? 'transport' : 'depannage';
   document.getElementById(prefix+'-histo-month-label').textContent = MONTHS_FR_FULL[m]+' '+y;
@@ -2544,7 +2545,7 @@ function _renderCongesAdmin(y,m) {
 // ════ ATELIER ════
 function enterAtelier(nom) {
   const today = new Date();
-  histoMois.a = new Date();
+  window.histoMois.a = new Date();
   document.getElementById('a-page-pointage').style.display='block';
   document.getElementById('a-page-historique').style.display='none';
   document.querySelectorAll('#screen-atelier .nav-item').forEach((b,i)=>b.classList.toggle('active',i===0));
@@ -2618,7 +2619,7 @@ function aNav(page, btn) {
 }
 function renderHistoAtelier() {
   const nom=currentUser;
-  const mois=histoMois.a;
+  const mois=window.histoMois.a;
   const y=mois.getFullYear(), m=mois.getMonth();
   document.getElementById('a-histo-month-label').textContent=MONTHS_FR_FULL[m]+' '+y;
   document.getElementById('a-histo-list').innerHTML='<div style="text-align:center;padding:20px;color:var(--text-muted);">Chargement...</div>';
