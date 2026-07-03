@@ -630,9 +630,15 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'SF Pro
 <!-- ══ OVERLAY FICHES ══ -->
 <div id="overlay-fiches" style="display:none; position:fixed; inset:0; background:#f0f4f8; z-index:100; flex-direction:column; overflow:hidden;">
   <div class="topbar" style="background:#064e3b;">
-    <div>
-      <div class="topbar-title">📋 Fiches récapitulatives</div>
-      <div class="topbar-sub" id="fiche-month-label">—</div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div>
+        <div class="topbar-title">📋 Fiches récapitulatives</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.1); border-radius:8px; padding:4px 10px;">
+        <button onclick="changeFicheMois(-1)" style="background:none;border:none;color:white;font-size:18px;cursor:pointer;padding:0 4px;">‹</button>
+        <span id="fiche-month-label" style="color:white;font-size:13px;font-weight:600;min-width:100px;text-align:center;">—</span>
+        <button onclick="changeFicheMois(1)" style="background:none;border:none;color:white;font-size:18px;cursor:pointer;padding:0 4px;">›</button>
+      </div>
     </div>
     <button class="topbar-btn" onclick="closeFiches()">✕ Fermer</button>
   </div>
@@ -1854,21 +1860,52 @@ function renderGLists(){
 }
 
 /* ══ FICHES ══ */
-function openFiches() {
-  document.getElementById('overlay-fiches').style.display = 'flex';
-  document.getElementById('fiche-month-label').textContent =
-    ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'][currentMonth.getMonth()] + ' ' + currentMonth.getFullYear();
+let ficheMois = new Date();
+
+function updateFicheMonthLabel() {
+  const MOIS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  document.getElementById('fiche-month-label').textContent = MOIS[ficheMois.getMonth()] + ' ' + ficheMois.getFullYear();
+}
+
+function changeFicheMois(delta) {
+  ficheMois.setMonth(ficheMois.getMonth() + delta);
+  updateFicheMonthLabel();
+  // Recharger les données et rafraîchir la fiche
   if(window.__db){
     Promise.all([
       window.__db.collection('pointages_transport').get(),
       window.__db.collection('pointages_depannage').get(),
-      window.__db.collection('pointages_atelier').get()
-    ]).then(([tS,dS,aS])=>{
+      window.__db.collection('pointages_atelier').get(),
+      window.__db.collection('conges').get()
+    ]).then(([tS,dS,aS,cS])=>{
       dbCache.transport=tS.docs.map(d=>d.data());
       dbCache.depannage=dS.docs.map(d=>d.data());
       dbCache.atelier=aS.docs.map(d=>d.data());
+      dbCacheConges.length=0; cS.forEach(d=>dbCacheConges.push(d.data()));
+      renderFichePreview();
+    }).catch(()=>renderFichePreview());
+  } else renderFichePreview();
+}
+
+function openFiches() {
+  ficheMois = new Date(currentMonth);
+  document.getElementById('overlay-fiches').style.display = 'flex';
+  updateFicheMonthLabel();
+  if(window.__db){
+    Promise.all([
+      window.__db.collection('pointages_transport').get(),
+      window.__db.collection('pointages_depannage').get(),
+      window.__db.collection('pointages_atelier').get(),
+      window.__db.collection('conges').get()
+    ]).then(([tS,dS,aS,cS])=>{
+      dbCache.transport=tS.docs.map(d=>d.data());
+      dbCache.depannage=dS.docs.map(d=>d.data());
+      dbCache.atelier=aS.docs.map(d=>d.data());
+      dbCacheConges.length=0;
+      cS.forEach(d=>dbCacheConges.push(d.data()));
+      console.log('Congés chargés:', dbCacheConges.length);
       renderFicheList();
-    }).catch(()=>renderFicheList());
+    }).catch(e=>{console.error('Erreur chargement fiches:',e); renderFicheList();});
   } else { renderFicheList(); }
 }
 function closeFiches() { document.getElementById('overlay-fiches').style.display = 'none'; }
@@ -1885,7 +1922,7 @@ function renderFicheList() {
 function renderFichePreview() {
   const cat = document.getElementById('fiche-categorie').value;
   const nom = document.getElementById('fiche-employe').value;
-  document.getElementById('fiche-preview').innerHTML = buildFicheHTML(cat, nom, currentMonth);
+  document.getElementById('fiche-preview').innerHTML = buildFicheHTML(cat, nom, ficheMois);
 }
 
 function buildFicheHTML(cat, nom, month) {
@@ -1901,6 +1938,13 @@ function buildFicheHTML(cat, nom, month) {
 
   let totNormal=0, totFerie=0, totDim=0, totInter=0, totSupp=0, totDecouche=0, totPanier=0;
 
+  // Congés du salarié pour ce mois
+  const ficheCongesDates = new Set();
+  dbCacheConges.filter(e => e.nom === nom && e.dates).forEach(e => e.dates.forEach(d => {
+    const dd = new Date(d+'T12:00:00');
+    if(dd.getFullYear()===y && dd.getMonth()===m) ficheCongesDates.add(d);
+  }));
+
   let rows = '';
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
@@ -1909,6 +1953,7 @@ function buildFicheHTML(cat, nom, month) {
     const isSun = dow === 0;
     const isSat = dow === 6;
     const isOff = isSun || isSat || isFerie;
+    const isConge = ficheCongesDates.has(dateStr);
 
     const e = entryMap[dateStr];
     const dayLabel = DAYS_FR[dow];
@@ -1918,6 +1963,13 @@ function buildFicheHTML(cat, nom, month) {
     if (isFerie) rowClass = 'ferie';
     else if (isSun) rowClass = 'dimanche';
     else if (isSat) rowClass = 'weekend';
+
+    // Afficher congé dans le tableau
+    if (isConge && !e) {
+      rows += `<tr class="${rowClass}"><td style="text-align:left">${dayLabel}</td><td style="font-weight:600">${d}</td>
+        <td colspan="7" style="color:#d97706;font-style:italic;text-align:center;">🏖️ Congé</td></tr>`;
+      continue;
+    }
 
     if (e && (e.isRepos || e.conge)) {
       const label = e.conge ? '🏖️ Congé' : '🛌 Repos';
@@ -1947,7 +1999,8 @@ function buildFicheHTML(cat, nom, month) {
         const inter = (e.horsHorairesTotal || 0) * 60;
         if (e.isDimOuFerie) {
           if (isFerie) { hFerie = fmtH(mins); totFerie += mins; }
-          else { hDim = fmtH(mins); totDim += mins; }
+          else if (isSun) { hDim = fmtH(mins); totDim += mins; }
+          else { hNorm = fmtH(mins); totNormal += mins; } // samedi → H. normales
         } else {
           const dSupp = e.minutesSupp !== undefined ? e.minutesSupp : Math.max(0, mins - getRefMinutes(e.nom, dow));
           const dNorm = mins - dSupp;
@@ -1973,19 +2026,26 @@ function buildFicheHTML(cat, nom, month) {
     </tr>`;
   }
 
-  const totalGeneral = totNormal + totFerie + totDim + totInter + totSupp;
+  const totNormalTotal = totNormal + totSupp + totInter;
+  const totalGeneral = totNormalTotal + totFerie + totDim;
   const isTransport = cat === 'transport';
   const moisLabel = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'][m];
 
+  // Calculer les congés du salarié pour ce mois
+  const totConges = dbCacheConges.filter(e => e.nom === nom && e.dates)
+    .reduce((s, e) => s + e.dates.filter(d => {
+      const dd = new Date(d+'T12:00:00');
+      return dd.getFullYear()===y && dd.getMonth()===m;
+    }).length, 0);
+
   let footerBadges = `
-    <div class="fiche-badge">Heures normales<span>${fmtH(totNormal)}</span></div>
-    <div class="fiche-badge">Heures supp.<span>${totSupp>0?'+'+fmtH(totSupp):'0h'}</span></div>
+    <div class="fiche-badge">Heures normales<span>${fmtH(totNormalTotal)}</span></div>
     <div class="fiche-badge">Jours fériés<span>${fmtH(totFerie)}</span></div>
     <div class="fiche-badge">Dimanches<span>${fmtH(totDim)}</span></div>`;
-  if (!isTransport) footerBadges += `<div class="fiche-badge">Interventions hors h.<span>${fmtH(totInter)}</span></div>`;
   footerBadges += `<div class="fiche-badge" style="border-color:#064e3b;"><strong>Total général</strong><span style="color:#064e3b">${fmtH(totalGeneral)}</span></div>`;
   if (isTransport) footerBadges += `<div class="fiche-badge">🌙 Découches<span>${totDecouche}</span></div>`;
   footerBadges += `<div class="fiche-badge" style="${totPanier>0?'border-color:#22c55e;':''}">🍽️ Paniers repas<span style="color:${totPanier>0?'#16a34a':'#94a3b8'}">${totPanier}</span></div>`;
+  footerBadges += `<div class="fiche-badge" style="${totConges>0?'border-color:#f59e0b;background:#fef3c7;':''}">🏖️ Congés<span style="color:${totConges>0?'#d97706':'#94a3b8'}">${totConges} jour${totConges>1?'s':''}</span></div>`;
 
   return `<div style="border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-md);">
     <div class="fiche-header">
@@ -2020,7 +2080,7 @@ function buildFicheHTML(cat, nom, month) {
 function imprimerFiche() {
   const cat = document.getElementById('fiche-categorie').value;
   const nom = document.getElementById('fiche-employe').value;
-  const html = buildFicheHTML(cat, nom, currentMonth);
+  const html = buildFicheHTML(cat, nom, ficheMois);
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
     <title>Fiche ${nom}</title>
@@ -2103,12 +2163,13 @@ function imprimerToutesFiches() {
     ...DEPANNAGE_NAMES.map(n => ({cat:'depannage', nom:n}))
   ];
   const pages = allEntries.map((e, i) => {
-    const html = buildFicheHTML(e.cat, e.nom, currentMonth);
+    const html = buildFicheHTML(e.cat, e.nom, ficheMois);
     const isLast = i === allEntries.length - 1;
     return `<div class="${isLast ? '' : 'page-break'}">${html}</div>`;
   }).join('\n');
   const win = window.open('', '_blank');
-  const moisLabel = document.getElementById('fiche-month-label').textContent;
+  const MOIS_LABELS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const moisLabel = MOIS_LABELS[ficheMois.getMonth()] + ' ' + ficheMois.getFullYear();
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
     <title>Toutes les fiches — ${moisLabel}</title>
     <style>${PRINT_CSS}</style>
@@ -2339,34 +2400,117 @@ function renderCongesAdmin() {
   } else _renderCongesAdmin(y,m);
 }
 function _renderCongesAdmin(y,m) {
-  const entries=dbCacheConges.filter(e=>e.dates&&e.dates.some(d=>{const dd=new Date(d+'T12:00:00');return dd.getFullYear()===y&&dd.getMonth()===m;}));
-  const byNom={};
-  entries.forEach(e=>{
-    if(!byNom[e.nom])byNom[e.nom]={jours:0,periodes:[]};
-    const j=e.dates.filter(d=>{const dd=new Date(d+'T12:00:00');return dd.getFullYear()===y&&dd.getMonth()===m;}).length;
-    byNom[e.nom].jours+=j;
-    byNom[e.nom].periodes.push({dateDebut:e.dateDebut,dateFin:e.dateFin,motif:e.motif,jours:j});
-  });
-  const total=Object.values(byNom).reduce((s,v)=>s+v.jours,0);
-  document.getElementById('g-c-total').textContent=total;
-  document.getElementById('g-c-salaries').textContent=Object.keys(byNom).length;
   const MF=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  // Récupérer tous les congés qui touchent ce mois
+  const entries = dbCacheConges.filter(e=>e.dates&&e.dates.some(d=>{
+    const dd=new Date(d+'T12:00:00');
+    return dd.getFullYear()===y&&dd.getMonth()===m;
+  }));
+
+  const total = entries.reduce((s,e)=>s+e.dates.filter(d=>{
+    const dd=new Date(d+'T12:00:00');
+    return dd.getFullYear()===y&&dd.getMonth()===m;
+  }).length, 0);
+
+  document.getElementById('g-c-total').textContent=total;
+  document.getElementById('g-c-salaries').textContent=new Set(entries.map(e=>e.nom)).size;
+
   const list=document.getElementById('g-c-list');
-  const sorted=Object.keys(byNom);
-  if(!sorted.length){list.innerHTML='<div style="text-align:center;color:var(--text-muted);padding:20px;">Aucun congé ce mois-ci</div>';return;}
-  list.innerHTML=sorted.map(nom=>{
-    const e=byNom[nom];
-    const periodes=e.periodes.map(p=>{
-      const d1=new Date(p.dateDebut+'T12:00:00'),d2=new Date(p.dateFin+'T12:00:00');
-      const label=p.dateDebut===p.dateFin?`${d1.getDate()} ${MF[d1.getMonth()]}`:`${d1.getDate()} ${MF[d1.getMonth()]} → ${d2.getDate()} ${MF[d2.getMonth()]}`;
-      return `<div style="font-size:12px;color:var(--text-muted);">📅 ${label} · ${p.jours}j${p.motif?' · '+p.motif:''}</div>`;
-    }).join('');
+  if(!entries.length){
+    list.innerHTML='<div style="text-align:center;color:var(--text-muted);padding:20px;">Aucun congé ce mois-ci</div>';
+    return;
+  }
+
+  // Trier par nom
+  entries.sort((a,b)=>a.nom.localeCompare(b.nom));
+
+  list.innerHTML = entries.map((e,i) => {
+    const d1=new Date(e.dateDebut+'T12:00:00'), d2=new Date(e.dateFin+'T12:00:00');
+    const label=e.dateDebut===e.dateFin
+      ?`${d1.getDate()} ${MF[d1.getMonth()]}`
+      :`${d1.getDate()} ${MF[d1.getMonth()]} → ${d2.getDate()} ${MF[d2.getMonth()]}`;
+    const jours=e.dates.filter(d=>{const dd=new Date(d+'T12:00:00');return dd.getFullYear()===y&&dd.getMonth()===m;}).length;
+    const init=e.nom.split(' ').map(w=>w[0]).join('').substring(0,2);
     return `<div class="list-row">
-      <div class="avatar" style="background:#fef3c7;color:#d97706;">${nom.split(' ').map(w=>w[0]).join('').substring(0,2)}</div>
-      <div class="list-info"><div class="list-name">${nom}</div>${periodes}</div>
-      <div class="list-right"><div class="list-hours" style="color:#d97706;">${e.jours}j</div><div class="list-sub">congés</div></div>
+      <div class="avatar" style="background:#fef3c7;color:#d97706;">${init}</div>
+      <div class="list-info">
+        <div class="list-name">${e.nom}</div>
+        <div class="list-detail">📅 ${label} · ${jours}j${e.motif?' · '+e.motif:''}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button onclick="openEditConge(${i})" style="background:#eff6ff;color:#1d4ed8;border:none;border-radius:6px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;">✏️</button>
+        <button onclick="deleteConge(${i})" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;">🗑️</button>
+      </div>
     </div>`;
   }).join('');
+
+  // Stocker les entrées pour les actions
+  window._congesAdminList = entries;
+}
+
+function deleteConge(idx) {
+  const e = window._congesAdminList[idx];
+  if (!confirm(`Supprimer le congé de ${e.nom} du ${e.dateDebut} au ${e.dateFin} ?`)) return;
+  // Supprimer du cache local
+  const cacheIdx = dbCacheConges.indexOf(e);
+  if (cacheIdx >= 0) dbCacheConges.splice(cacheIdx, 1);
+  // Supprimer dans Firestore
+  if (window.__db) {
+    window.__db.collection('conges')
+      .where('nom','==',e.nom)
+      .where('dateDebut','==',e.dateDebut)
+      .where('dateFin','==',e.dateFin)
+      .get()
+      .then(snap => snap.forEach(d => d.ref.delete()))
+      .catch(err => console.error('Erreur suppression congé:', err));
+  }
+  renderCongesAdmin();
+}
+
+function openEditConge(idx) {
+  const e = window._congesAdminList[idx];
+  window._editCongeIdx = idx;
+  document.getElementById('edit-conge-nom').textContent = e.nom;
+  document.getElementById('edit-conge-debut').value = e.dateDebut;
+  document.getElementById('edit-conge-fin').value = e.dateFin;
+  document.getElementById('edit-conge-motif').value = e.motif || '';
+  document.getElementById('conge-edit-modal').style.display = 'flex';
+}
+
+function closeEditConge() {
+  document.getElementById('conge-edit-modal').style.display = 'none';
+}
+
+function saveEditConge() {
+  const e = window._congesAdminList[window._editCongeIdx];
+  const newDebut = document.getElementById('edit-conge-debut').value;
+  const newFin = document.getElementById('edit-conge-fin').value;
+  const newMotif = document.getElementById('edit-conge-motif').value;
+  if (!newDebut || !newFin) return;
+
+  // Recalculer les dates ouvrées
+  let jours=0; const cur=new Date(newDebut+'T12:00:00'); const end=new Date(newFin+'T12:00:00'); const dates=[];
+  while(cur<=end){if(cur.getDay()!==0&&cur.getDay()!==6){jours++;dates.push(cur.toISOString().split('T')[0]);}cur.setDate(cur.getDate()+1);}
+
+  const updated = Object.assign({}, e, {dateDebut:newDebut, dateFin:newFin, motif:newMotif, jours, dates});
+
+  // Mettre à jour le cache local
+  const cacheIdx = dbCacheConges.indexOf(e);
+  if (cacheIdx >= 0) dbCacheConges[cacheIdx] = updated;
+
+  // Mettre à jour dans Firestore
+  if (window.__db) {
+    window.__db.collection('conges')
+      .where('nom','==',e.nom)
+      .where('dateDebut','==',e.dateDebut)
+      .where('dateFin','==',e.dateFin)
+      .get()
+      .then(snap => snap.forEach(d => d.ref.update({dateDebut:newDebut,dateFin:newFin,motif:newMotif,jours,dates})))
+      .catch(err => console.error('Erreur modification congé:', err));
+  }
+
+  closeEditConge();
+  renderCongesAdmin();
 }
 
 // ════ ATELIER ════
@@ -2728,8 +2872,34 @@ function renderHistoAtelier() {
       <span>Profil</span>
     </button>
   </div>
+<!-- Modal édition congé -->
+<div id="conge-edit-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:400; align-items:center; justify-content:center;">
+  <div style="background:white; border-radius:var(--radius); padding:24px; width:90%; max-width:400px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+      <div style="font-size:16px; font-weight:700;">✏️ Modifier le congé</div>
+      <button onclick="closeEditConge()" style="background:var(--bg);border:none;border-radius:8px;padding:6px 10px;font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div style="font-size:14px;font-weight:600;color:var(--text-muted);margin-bottom:16px;" id="edit-conge-nom"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div>
+        <label style="font-size:12px;color:var(--text-muted);font-weight:600;display:block;margin-bottom:4px;">Du</label>
+        <input type="date" id="edit-conge-debut" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;">
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--text-muted);font-weight:600;display:block;margin-bottom:4px;">Au</label>
+        <input type="date" id="edit-conge-fin" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;">
+      </div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:12px;color:var(--text-muted);font-weight:600;display:block;margin-bottom:4px;">Motif</label>
+      <input type="text" id="edit-conge-motif" placeholder="Congés annuels, RTT…" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;">
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="closeEditConge()" style="flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:14px;font-weight:600;cursor:pointer;">Annuler</button>
+      <button onclick="saveEditConge()" style="flex:2;background:#d97706;color:white;border:none;border-radius:var(--radius-sm);padding:12px;font-size:14px;font-weight:600;cursor:pointer;">💾 Enregistrer</button>
+    </div>
+  </div>
 </div>
-<!-- FIN ATELIER SCREEN -->
 
 </body>
 </html>
