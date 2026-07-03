@@ -1986,7 +1986,7 @@ function buildFicheHTML(cat, nom, month) {
         const norm = mins - supp;
         if (isFerie) { hFerie = fmtH(mins); totFerie += mins; }
         else if (isSun) { hDim = fmtH(mins); totDim += mins; }
-        else { hNorm = fmtH(norm); hSupp = supp > 0 ? '+'+fmtH(supp) : ''; totNormal += norm; totSupp += supp; }
+        else { hNorm = fmtH(norm + supp); totNormal += norm + supp; }
         hTotal = fmtH(mins);
         if (e.decouche) { decStr = '🌙'; totDecouche++; }
         if (e.panier) { panStr = '🍽️'; totPanier++; }
@@ -2005,7 +2005,7 @@ function buildFicheHTML(cat, nom, month) {
           const dSupp = e.minutesSupp !== undefined ? e.minutesSupp : Math.max(0, mins - getRefMinutes(e.nom, dow));
           const dNorm = mins - dSupp;
           hNorm = fmtH(dNorm); totNormal += dNorm;
-          if (dSupp > 0) { hSupp = '+'+fmtH(dSupp); totSupp += dSupp; }
+          totNormal += dSupp;
           if (inter > 0) { hInter = fmtH(inter); totInter += inter; }
         }
         hTotal = fmtH(mins + inter);
@@ -2017,7 +2017,7 @@ function buildFicheHTML(cat, nom, month) {
       <td style="text-align:left; font-weight:${isOff?'600':'400'}; color:${isOff?'#64748b':'inherit'}">${dayLabel}</td>
       <td style="font-weight:600">${d}</td>
       <td class="heures">${hNorm}</td>
-      <td class="heures" style="color:#f97316">${hSupp}</td>
+
       <td class="heures" style="color:#d97706">${hFerie}</td>
       <td class="heures" style="color:#9333ea">${hDim}</td>
       <td class="heures" style="color:#0369a1">${hInter}</td>
@@ -2056,7 +2056,7 @@ function buildFicheHTML(cat, nom, month) {
     <table class="fiche-table">
       <thead><tr>
         <th style="text-align:left">Jour</th><th>Date</th>
-        <th>H. normales</th><th>H. supp.</th>
+        <th>H. normales</th>
         <th>Jours fériés</th><th>Dimanches</th>
         <th>Interventions</th><th>Total</th><th></th>
       </tr></thead>
@@ -2064,7 +2064,7 @@ function buildFicheHTML(cat, nom, month) {
       <tfoot><tr class="total-row">
         <td colspan="2" style="text-align:left">TOTAUX</td>
         <td>${fmtH(totNormal)}</td>
-        <td>${totSupp>0?'+'+fmtH(totSupp):'—'}</td>
+
         <td>${fmtH(totFerie)}</td>
         <td>${fmtH(totDim)}</td>
         <td>${fmtH(totInter)}</td>
